@@ -1,25 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import UserForm from "./components/UserForm";
+import UserDetails from "./components/UserDetails";
+import "./styles/App.css";
 
-function App() {
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [repos, setRepos] = useState([]);
+
+  const getUser = async (username) => {
+    try {
+      const responseUser = await fetch(
+        `https://api.github.com/users/${username}`
+      );
+      const userData = await responseUser.json();
+      const responseRepos = await fetch(
+        `https://api.github.com/users/${username}/repos`
+      );
+      const reposData = await responseRepos.json();
+
+      setUser(userData);
+      setRepos(reposData);
+    } catch (error) {
+      console.error(
+        "Greška prilikom dohvaćanja korisnika i repozitorija:",
+        error
+      );
+    }
+  };
+
+  const resetUser = () => {
+    setUser(null);
+    setRepos([]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {user ? (
+        <UserDetails user={user} repos={repos} resetUser={resetUser} />
+      ) : (
+        <UserForm getUser={getUser} />
+      )}
     </div>
   );
-}
+};
 
 export default App;
